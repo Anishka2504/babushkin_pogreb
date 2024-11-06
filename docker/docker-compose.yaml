@@ -1,4 +1,4 @@
-version: "1.1"
+version: "1.2"
 
 services:
   rabbitmq:
@@ -17,6 +17,21 @@ services:
       - ./rabbitmq:/var/lib/rabbitmq
     networks:
       - babushkin_pogreb
+
+  postgres:
+    image: postgres:latest
+    container_name: bot_postgres
+    restart: always
+    ports:
+      - 5435:5432
+    environment:
+      - POSTGRES_DB=pogreb_db
+      - POSTGRES_USER=pguser
+      - POSTGRES_PASSWORD=pgpassword
+    networks:
+      - babushkin_pogreb
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
 
 networks:
   babushkin_pogreb:
