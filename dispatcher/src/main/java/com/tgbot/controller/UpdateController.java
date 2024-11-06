@@ -12,6 +12,9 @@ import static com.tgbot.model.RabbitQueue.DOC_MESSAGE_UPDATE;
 import static com.tgbot.model.RabbitQueue.PHOTO_MESSAGE_UPDATE;
 import static com.tgbot.model.RabbitQueue.TEXT_MESSAGE_UPDATE;
 
+/**
+ * Распределяет полученные сообщения от пользователя по типам очередей
+ */
 @Component
 @Slf4j
 public class UpdateController {
@@ -60,7 +63,7 @@ public class UpdateController {
         setView(sendMessage);
     }
 
-    private void setView(SendMessage sendMessage) {
+    public void setView(SendMessage sendMessage) {
         telegramBot.sendAnswerMessage(sendMessage);
     }
 
