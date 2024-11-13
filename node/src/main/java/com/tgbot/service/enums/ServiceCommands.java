@@ -10,14 +10,19 @@ public enum ServiceCommands {
     CANCEL("/cancel"),
     START("/start");
 
-    private final String cmd;
+    private final String value;
 
     @Override
     public String toString() {
-        return cmd;
+        return value;
     }
 
-    public boolean equals(String cmd) {
-        return this.toString().equals(cmd);
+    public static ServiceCommands fromValue(String v) {
+        for (ServiceCommands command : ServiceCommands.values()) {
+            if (command.value.equals(v)) {
+                return command;
+            }
+        }
+        return null;
     }
 }

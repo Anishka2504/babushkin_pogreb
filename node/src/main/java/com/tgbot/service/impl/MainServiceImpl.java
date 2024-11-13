@@ -1,10 +1,14 @@
 package com.tgbot.service.impl;
 
+import com.tgbot.entity.AppDocument;
 import com.tgbot.entity.RawData;
+import com.tgbot.exception.UploadFileException;
 import com.tgbot.repository.RawDataRepository;
+import com.tgbot.service.FileService;
 import com.tgbot.service.MainService;
 import com.tgbot.service.ProducerService;
 import com.tgbot.entity.BotUser;
+import com.tgbot.service.enums.ServiceCommands;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,7 @@ public class MainServiceImpl implements MainService {
     private final RawDataRepository rawDataRepository;
     private final ProducerService producerService;
     private final BotUserRepository botUserRepository;
+    private final FileService fileService;
 
     @Override
     public void processTextMessage(Update update) {
@@ -35,10 +40,12 @@ public class MainServiceImpl implements MainService {
         var botUser = findOrSaveBotUser(update);
         var userState = botUser.getState();
         var text = update.getMessage().getText();
+        var serviceCommand = ServiceCommands.fromValue(text);
+
         var answer = "";
 
         //обработка статуса пользователя
-        if (CANCEL.equals(text)) {
+        if (CANCEL.equals(serviceCommand)) {
             answer = processCancel(botUser);
         } else if (BASIC.equals(userState)) {
             answer = processServiceCommand(botUser, text);
@@ -63,9 +70,17 @@ public class MainServiceImpl implements MainService {
         if (isNotAllowedToSendContent(botUser, chatId)) {
             return;
         }
-        //todo добавить сохранение документа в бд
-        var answer = "Документ успешно загружен! Ссылка для скачивания: http://tgbot.com/get-doc/777";
-        sendAnswer(answer, chatId);
+
+        try {
+            AppDocument document = fileService.processDoc(update.getMessage());
+            //todo добавить формирование ссылки на скачивание документа
+            var answer = "Документ успешно загружен! Ссылка для скачивания: http://tgbot.com/get-doc/777";
+            sendAnswer(answer, chatId);
+        } catch (UploadFileException ex) {
+            log.error(ex.getMessage());
+            var errorAnswer = "Произошла ошибка во время загрузки файла. Повторите попытку позже";
+            sendAnswer(errorAnswer, chatId);
+        }
 
     }
 
@@ -106,12 +121,13 @@ public class MainServiceImpl implements MainService {
     }
 
     private String processServiceCommand(BotUser botUser, String cmd) {
-        if (REGISTRATION.equals(cmd)) {
+        ServiceCommands serviceCommand = ServiceCommands.fromValue(cmd);
+        if (REGISTRATION.equals(serviceCommand)) {
             //todo добавить регистрацию
             return "Временно недоступно";
-        } else if (HELP.equals(cmd)) {
+        } else if (HELP.equals(serviceCommand)) {
             return help();
-        } else if (START.equals(cmd)) {
+        } else if (START.equals(serviceCommand)) {
             return "Приветствую! Чтобы просмотреть список доступных команд, введите /help";
         } else {
             return "Неизвестная команда! Чтобы просмотреть список доступных команд, введите /help";
