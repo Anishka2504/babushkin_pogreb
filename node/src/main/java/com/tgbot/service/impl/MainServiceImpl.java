@@ -1,6 +1,7 @@
 package com.tgbot.service.impl;
 
 import com.tgbot.entity.AppDocument;
+import com.tgbot.entity.AppPhoto;
 import com.tgbot.entity.RawData;
 import com.tgbot.exception.UploadFileException;
 import com.tgbot.repository.RawDataRepository;
@@ -28,6 +29,13 @@ import static com.tgbot.service.enums.ServiceCommands.START;
 @Slf4j
 public class MainServiceImpl implements MainService {
 
+    public static final String DOC_UPLOAD_SUCCESSFULLY_ANSWER = "Документ успешно загружен! Ссылка для скачивания: http://tgbot.com/get-doc/777";
+    public static final String PHOTO_UPLOAD_SUCCESSFULLY_ANSWER = "Изображение успешно загружено! Ссылка для скачивания: http://tgbot.com/get-photo/777";
+    public static final String ERROR_UPLOAD_MESSAGE_ANSWER = "Произошла ошибка во время загрузки файла. Повторите попытку позже";
+    public static final String UNKNOWN_COMMAND_ERROR_ANSWER = "Неизвестная ошибка! Введите /cancel и попробуйте снова";
+    public static final String REGISTRATION_ERROR_ANSWER = "Зарегистрируйтесь или подтвердите свою учётную запись для загрузки файлов";
+    public static final String CANCEL_PROCESSING_ANSWER = "Для отправки файлов отмените текущую команду с помощью /cancel";
+
     private final RawDataRepository rawDataRepository;
     private final ProducerService producerService;
     private final BotUserRepository botUserRepository;
@@ -53,7 +61,7 @@ public class MainServiceImpl implements MainService {
             //todo добавить обработку имейла
         } else {
             log.error("Unknown state: {}", userState);
-            answer = "Неизвестная ошибка! Введите /cancel и попробуйте снова";
+            answer = UNKNOWN_COMMAND_ERROR_ANSWER;
         }
 
         var chatId = update.getMessage().getChatId();
@@ -74,14 +82,11 @@ public class MainServiceImpl implements MainService {
         try {
             AppDocument document = fileService.processDoc(update.getMessage());
             //todo добавить формирование ссылки на скачивание документа
-            var answer = "Документ успешно загружен! Ссылка для скачивания: http://tgbot.com/get-doc/777";
-            sendAnswer(answer, chatId);
+            sendAnswer(DOC_UPLOAD_SUCCESSFULLY_ANSWER, chatId);
         } catch (UploadFileException ex) {
             log.error(ex.getMessage());
-            var errorAnswer = "Произошла ошибка во время загрузки файла. Повторите попытку позже";
-            sendAnswer(errorAnswer, chatId);
+            sendAnswer(ERROR_UPLOAD_MESSAGE_ANSWER, chatId);
         }
-
     }
 
     @Override
@@ -94,20 +99,24 @@ public class MainServiceImpl implements MainService {
         if (isNotAllowedToSendContent(botUser, chatId)) {
             return;
         }
-        //todo добавить сохранение документа в бд
-        var answer = "Фото успешно загружено! Ссылка для скачивания: http://tgbot.com/get-photo/777";
-        sendAnswer(answer, chatId);
+
+        try {
+            AppPhoto appPhoto = fileService.processPhoto(update.getMessage());
+            //todo добавить формирование ссылки на скачивание фото
+            sendAnswer(PHOTO_UPLOAD_SUCCESSFULLY_ANSWER, chatId);
+        } catch (UploadFileException ex) {
+            log.error(ex.getMessage());
+            sendAnswer(ERROR_UPLOAD_MESSAGE_ANSWER, chatId);
+        }
     }
 
     private boolean isNotAllowedToSendContent(BotUser botUser, Long chatId) {
         var userState = botUser.getState();
         if (!botUser.getIsActive()) {
-            var errorAnswer = "Зарегистрируйтесь или подтвердите свою учётную запись для загрузки файлов";
-            sendAnswer(errorAnswer, chatId);
+            sendAnswer(REGISTRATION_ERROR_ANSWER, chatId);
             return true;
         } else if (!BASIC.equals(userState)) {
-            var errorAnswer = "Для отправки файлов отмените текущую команду с помощью /cancel";
-            sendAnswer(errorAnswer, chatId);
+            sendAnswer(CANCEL_PROCESSING_ANSWER, chatId);
             return true;
         }
         return false;
