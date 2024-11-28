@@ -3,11 +3,13 @@ package com.tgbot.service.impl;
 import com.tgbot.entity.AppDocument;
 import com.tgbot.entity.AppPhoto;
 import com.tgbot.entity.BinaryContent;
+import com.tgbot.enums.LinkType;
 import com.tgbot.exception.UploadFileException;
 import com.tgbot.repository.AppDocumentRepository;
 import com.tgbot.repository.AppPhotoRepository;
 import com.tgbot.repository.BinaryContentRepository;
 import com.tgbot.service.FileService;
+import com.tgbot.utils.CryptoTool;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,10 +39,13 @@ public class FileServiceImpl implements FileService {
     private String fileInfoUri;
     @Value("${service.file_storage.uri}")
     private String fileStorageUri;
+    @Value("${link.address}")
+    private String linkAddress;
 
     private final AppDocumentRepository appDocumentRepository;
     private final BinaryContentRepository binaryContentRepository;
     private final AppPhotoRepository appPhotoRepository;
+    private final CryptoTool cryptoTool;
 
     @Override
     public AppDocument processDoc(Message telegramMessage) {
@@ -56,10 +61,14 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    // если отправить картинки пачкой, обработана будет только первая
     @Override
     public AppPhoto processPhoto(Message telegramMessage) {
-        //todo если отправить картинки пачкой, обработана будет только первая
-        PhotoSize photo = telegramMessage.getPhoto().get(0);
+        //выбор размера скачиваемого из ТГ изображения, нужно выбрать самый последний элемент, чтобы получить лучшее качество
+        int photoSizeCount = telegramMessage.getPhoto().size();
+        int photoSizeIndex = photoSizeCount > 1 ? telegramMessage.getPhoto().size() - 1 : 0;
+
+        PhotoSize photo = telegramMessage.getPhoto().get(photoSizeIndex);
         String fileId = photo.getFileId();
         ResponseEntity<String> response = getFileDataFromTelegram(fileId);
         if (HttpStatus.OK.equals(response.getStatusCode())) {
@@ -69,6 +78,12 @@ public class FileServiceImpl implements FileService {
         } else {
             throw new UploadFileException("Bad response from telegram service: " + response);
         }
+    }
+
+    @Override
+    public String generateLink(Long id, LinkType linkType) {
+        var hash = cryptoTool.hashOf(id);
+        return "http://" + linkAddress + linkType + "?id=" + hash;
     }
 
     private static AppPhoto buildTransientAppPhoto(BinaryContent binaryContent, PhotoSize photo) {

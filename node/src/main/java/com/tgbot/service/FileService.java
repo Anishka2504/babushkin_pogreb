@@ -2,6 +2,7 @@ package com.tgbot.service;
 
 import com.tgbot.entity.AppDocument;
 import com.tgbot.entity.AppPhoto;
+import com.tgbot.enums.LinkType;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 /**
@@ -12,4 +13,6 @@ public interface FileService {
     AppDocument processDoc(Message telegramMessage);
 
     AppPhoto processPhoto(Message telegramMessage);
+
+    String generateLink(Long id, LinkType linkType);
 }

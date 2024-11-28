@@ -3,6 +3,7 @@ package com.tgbot.service.impl;
 import com.tgbot.entity.AppDocument;
 import com.tgbot.entity.AppPhoto;
 import com.tgbot.entity.RawData;
+import com.tgbot.enums.LinkType;
 import com.tgbot.exception.UploadFileException;
 import com.tgbot.repository.RawDataRepository;
 import com.tgbot.service.FileService;
@@ -29,8 +30,8 @@ import static com.tgbot.service.enums.ServiceCommands.START;
 @Slf4j
 public class MainServiceImpl implements MainService {
 
-    public static final String DOC_UPLOAD_SUCCESSFULLY_ANSWER = "Документ успешно загружен! Ссылка для скачивания: http://tgbot.com/get-doc/777";
-    public static final String PHOTO_UPLOAD_SUCCESSFULLY_ANSWER = "Изображение успешно загружено! Ссылка для скачивания: http://tgbot.com/get-photo/777";
+    public static final String DOC_UPLOAD_SUCCESSFULLY_ANSWER = "Документ успешно загружен! Ссылка для скачивания: %s";
+    public static final String PHOTO_UPLOAD_SUCCESSFULLY_ANSWER = "Изображение успешно загружено! Ссылка для скачивания: %s";
     public static final String ERROR_UPLOAD_MESSAGE_ANSWER = "Произошла ошибка во время загрузки файла. Повторите попытку позже";
     public static final String UNKNOWN_COMMAND_ERROR_ANSWER = "Неизвестная ошибка! Введите /cancel и попробуйте снова";
     public static final String REGISTRATION_ERROR_ANSWER = "Зарегистрируйтесь или подтвердите свою учётную запись для загрузки файлов";
@@ -81,8 +82,8 @@ public class MainServiceImpl implements MainService {
 
         try {
             AppDocument document = fileService.processDoc(update.getMessage());
-            //todo добавить формирование ссылки на скачивание документа
-            sendAnswer(DOC_UPLOAD_SUCCESSFULLY_ANSWER, chatId);
+            var link = fileService.generateLink(document.getId(), LinkType.GET_DOC);
+            sendAnswer(String.format(DOC_UPLOAD_SUCCESSFULLY_ANSWER, link), chatId);
         } catch (UploadFileException ex) {
             log.error(ex.getMessage());
             sendAnswer(ERROR_UPLOAD_MESSAGE_ANSWER, chatId);
@@ -102,8 +103,8 @@ public class MainServiceImpl implements MainService {
 
         try {
             AppPhoto appPhoto = fileService.processPhoto(update.getMessage());
-            //todo добавить формирование ссылки на скачивание фото
-            sendAnswer(PHOTO_UPLOAD_SUCCESSFULLY_ANSWER, chatId);
+            var link = fileService.generateLink(appPhoto.getId(), LinkType.GET_PHOTO);
+            sendAnswer(String.format(PHOTO_UPLOAD_SUCCESSFULLY_ANSWER, link), chatId);
         } catch (UploadFileException ex) {
             log.error(ex.getMessage());
             sendAnswer(ERROR_UPLOAD_MESSAGE_ANSWER, chatId);
