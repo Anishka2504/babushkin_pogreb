@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="5" author="Anna Drozdovskaya">
+        <preConditions onFailMessage="Table app_photo already exists">
+            <not>
+                <tableExists tableName="app_document"/>
+            </not>
+        </preConditions>
+        <createTable tableName="app_document">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" unique="true" nullable="false"/>
+            </column>
+            <column name="telegram_file_id" type="varchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="size" type="integer">
+                <constraints nullable="false"/>
+            </column>
+            <column name="binary_content_id" type="bigint">
+                <constraints foreignKeyName="fk_app_photo_binary_content" referencedTableName="binary_content" referencedColumnNames="id"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="2" author="anna drozdovskaya">
+        <preConditions onFailMessage="Table raw_data already exists">
+            <not>
+                <tableExists tableName="raw_data"/>
+            </not>
+        </preConditions>
+    <createTable tableName="raw_data">
+        <column name="id" type="bigint" autoIncrement="true">
+            <constraints nullable="false" primaryKey="true" unique="true"/>
+        </column>
+        <column name="event" type="jsonb">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+    </changeSet>
+</databaseChangeLog>
