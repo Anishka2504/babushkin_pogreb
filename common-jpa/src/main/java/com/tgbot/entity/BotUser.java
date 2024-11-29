@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -27,7 +28,8 @@ import java.time.LocalDateTime;
 public class BotUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bot_user_seq_gen")
+    @SequenceGenerator(name = "bot_user_seq_gen", sequenceName = "bot_user_sequence", allocationSize = 1)
     private Long id;
     private Long telegramUserId;
     @CreationTimestamp

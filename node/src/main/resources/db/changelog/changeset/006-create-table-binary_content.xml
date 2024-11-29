@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="3" author="Anna Drozdovskaya">
+    <changeSet id="6" author="Anna Drozdovskaya">
         <preConditions onFailMessage="Table binary_content already exists">
             <not>
                 <tableExists tableName="binary_content"/>
@@ -14,7 +14,7 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false" unique="true"/>
             </column>
-            <column name="file_as_array_of_bytes" type="ARRAY&lt;BYTE&gt;"/>
+            <column name="file_as_array_of_bytes" type="bytea"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

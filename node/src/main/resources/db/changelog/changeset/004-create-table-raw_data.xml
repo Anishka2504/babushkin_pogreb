@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="2" author="anna drozdovskaya">
+    <changeSet id="4" author="anna drozdovskaya">
         <preConditions onFailMessage="Table raw_data already exists">
             <not>
                 <tableExists tableName="raw_data"/>

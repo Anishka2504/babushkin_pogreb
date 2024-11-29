@@ -4,7 +4,15 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <include file="/db/changelog/changeset/001-create-table-bot_user.xml"/>
-    <include file="/db/changelog/changeset/002-create-table-raw_data.xml"/>
+    <include file="/db/changelog/changeset/001-create-sequence-bot_user_sequence.xml"/>
+    <include file="/db/changelog/changeset/002-create-table-bot_user.xml"/>
+    <include file="/db/changelog/changeset/003-create-sequence-raw_data_sequence.xml"/>
+    <include file="/db/changelog/changeset/004-create-table-raw_data.xml"/>
+    <include file="/db/changelog/changeset/005-create-sequence-binary_content_sequence.xml"/>
+    <include file="/db/changelog/changeset/006-create-table-binary_content.xml"/>
+    <include file="/db/changelog/changeset/007-create-sequence-app_document_sequence.xml"/>
+    <include file="/db/changelog/changeset/008-create-table-app_document.xml"/>
+    <include file="/db/changelog/changeset/009-create-sequence-app_photo_sequence.xml"/>
+    <include file="/db/changelog/changeset/010-create-table-app_photo.xml"/>
 
 </databaseChangeLog>

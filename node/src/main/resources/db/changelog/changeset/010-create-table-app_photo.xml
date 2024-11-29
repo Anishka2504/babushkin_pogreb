@@ -4,30 +4,24 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <changeSet id="4" author="Anna Drozdovskaya">
-        <preConditions onFailMessage="Table app_document already exists">
+    <changeSet id="10" author="Anna Drozdovskaya">
+        <preConditions onFailMessage="Table app_photo already exists">
             <not>
-                <tableExists tableName="app_document"/>
+                <tableExists tableName="app_photo"/>
             </not>
         </preConditions>
-        <createTable tableName="app_document">
+        <createTable tableName="app_photo">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true" unique="true" nullable="false"/>
             </column>
             <column name="telegram_file_id" type="varchar">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="doc_name" type="varchar">
-                <constraints nullable="false"/>
-            </column>
             <column name="size" type="integer">
                 <constraints nullable="false"/>
             </column>
-            <column name="mime_type" type="varchar">
-                <constraints nullable="false"/>
-            </column>
             <column name="binary_content_id" type="bigint">
-                <constraints foreignKeyName="fk_app_document_binary_content" referencedTableName="binary_content" referencedColumnNames="id"/>
+                <constraints foreignKeyName="fk_app_photo_binary_content" referencedTableName="binary_content" referencedColumnNames="id"/>
             </column>
         </createTable>
 
