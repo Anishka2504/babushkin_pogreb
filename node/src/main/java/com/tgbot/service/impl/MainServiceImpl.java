@@ -6,6 +6,7 @@ import com.tgbot.entity.RawData;
 import com.tgbot.enums.LinkType;
 import com.tgbot.exception.UploadFileException;
 import com.tgbot.repository.RawDataRepository;
+import com.tgbot.service.BotUserService;
 import com.tgbot.service.FileService;
 import com.tgbot.service.MainService;
 import com.tgbot.service.ProducerService;
@@ -41,6 +42,7 @@ public class MainServiceImpl implements MainService {
     private final ProducerService producerService;
     private final BotUserRepository botUserRepository;
     private final FileService fileService;
+    private final BotUserService botUserService;
 
     @Override
     public void processTextMessage(Update update) {
@@ -59,7 +61,7 @@ public class MainServiceImpl implements MainService {
         } else if (BASIC.equals(userState)) {
             answer = processServiceCommand(botUser, text);
         } else if (WAIT_FOR_EMAIL.equals(userState)) {
-            //todo добавить обработку имейла
+            answer = botUserService.setEmail(botUser, text);
         } else {
             log.error("Unknown state: {}", userState);
             answer = UNKNOWN_COMMAND_ERROR_ANSWER;
@@ -133,8 +135,7 @@ public class MainServiceImpl implements MainService {
     private String processServiceCommand(BotUser botUser, String cmd) {
         ServiceCommands serviceCommand = ServiceCommands.fromValue(cmd);
         if (REGISTRATION.equals(serviceCommand)) {
-            //todo добавить регистрацию
-            return "Временно недоступно";
+            return botUserService.registerUser(botUser);
         } else if (HELP.equals(serviceCommand)) {
             return help();
         } else if (START.equals(serviceCommand)) {
@@ -160,20 +161,19 @@ public class MainServiceImpl implements MainService {
 
     private BotUser findOrSaveBotUser(Update update) {
         var telegramUser = update.getMessage().getFrom();
-        BotUser persistentUser = botUserRepository.findBotUserByTelegramUserId(telegramUser.getId());
-        if (persistentUser == null) {
+        var optionalUser = botUserRepository.findByTelegramUserId(telegramUser.getId());
+        if (optionalUser.isEmpty()) {
             BotUser transientUser = BotUser.builder()
                     .telegramUserId(telegramUser.getId())
                     .username(telegramUser.getUserName())
                     .firstName(telegramUser.getFirstName())
                     .lastName(telegramUser.getLastName())
                     .state(BASIC)
-                    //todo изменить значение по умолчанию после добавления регистрации
-                    .isActive(true)
+                    .isActive(false)
                     .build();
             return botUserRepository.save(transientUser);
         }
-        return persistentUser;
+        return optionalUser.get();
     }
 
     private void saveRawData(Update update) {
